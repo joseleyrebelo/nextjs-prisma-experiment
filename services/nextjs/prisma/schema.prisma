@@ -1,0 +1,27 @@
+datasource db {
+
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // provider  = "sqlite"
+  // url       = "file:./db.db"
+}
+
+generator  client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int @id @default(autoincrement())
+  fullName      String
+  color        String
+  connections   UserConnections[] @relation(name: "connection")
+  connectors    UserConnections[] @relation(name: "connector")
+}
+
+model UserConnections {
+  id              Int @id @default(autoincrement())
+  connection      User @relation(name: "connection", fields: [connectionId], references: [id])
+  connectionId    Int
+  connector       User @relation(name: "connector", fields: [connectorId], references: [id])
+  connectorId     Int
+}
