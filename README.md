@@ -47,7 +47,7 @@ In retrospect the task wasn't "type" heavy but TS was still helpful.
 - PostgreSQL - For being a powerful database specially when quantity comes to matter, also Prisma supported it.
 - Tailwind - Easy to use CSS utilities, faster styling/prototyping.
 
-# WWhat would I improve?
+# Improvements to-do:
 
 - Optimize **nextjs** docker image for production and dev distinction; Ensure docker and project folders are syncing up.
 - Replace **fetch** with **axios**, and add an interceptor to catch errors and update a context affecting the UI to display to the use that an error has happened.
