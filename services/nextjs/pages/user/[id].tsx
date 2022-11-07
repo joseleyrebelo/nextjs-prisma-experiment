@@ -5,7 +5,6 @@ import { UserQuery } from "../../types/user";
 import { ColorPicker, useColor } from "react-color-palette";
 import "react-color-palette/lib/css/styles.css";
 import { useEffect, useRef, useState } from "react";
-import onClickedOut from "../../util/onClickOutside";
 
 type Props = {
   data: UserQuery;
@@ -16,7 +15,6 @@ export default function User({ data }: Props) {
   const { fullName, connections } = data;
   const [isColorPicking, setIsColorPicking] = useState(false);
   const [color, setColor] = useColor("hex", data.color);
-  onClickedOut(colorPickerRef, () => setIsColorPicking(false));
 
   return (
     <div className="block">
@@ -37,6 +35,7 @@ export default function User({ data }: Props) {
             <span className="mix-blend-overlay text-white">{color.hex}</span>
           </div>
           <div
+            ref={colorPickerRef}
             className={
               `absolute top-full right-0 transition-all duration-500 shadow-sm ` +
               `${

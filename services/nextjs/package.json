@@ -14,6 +14,7 @@
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
     "@prisma/client": "^4.5.0",
+    "jest": "^29.2.2",
     "next": "13.0.0",
     "react": "18.2.0",
     "react-color-palette": "^6.2.0",

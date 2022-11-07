@@ -6,6 +6,8 @@ import { UserQuery } from "../types/user";
 import UserCard from "../components/UserCard";
 import LoadingUserCard from "../components/LoadingUserCard";
 
+const LOAD_AMOUNT = 20;
+
 type Props = {
   feed: UserQuery[];
 };
@@ -14,7 +16,7 @@ export default function Home({ ...props }: Props) {
   const ref = useRef(null);
   const [feed, setFeed] = useState(props.feed);
   const [isLoading, setIsLoading] = useState(false);
-  const [cursor, setCursor] = useState(10);
+  const [cursor, setCursor] = useState(LOAD_AMOUNT);
 
   const loadNext = async () => {
     if (!isLoading && cursor) {
@@ -55,7 +57,7 @@ export default function Home({ ...props }: Props) {
   return (
     <>
       <div className="block">
-        {feed.map((item, index) => (
+        {feed.map((item) => (
           <div key={item.fullName + item.color + item.id}>
             <UserCard {...item} />
           </div>
@@ -80,7 +82,7 @@ export default function Home({ ...props }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const feed = await getUsersData(20);
+  const feed = await getUsersData(LOAD_AMOUNT);
   return {
     props: { feed },
   };

@@ -1,8 +1,14 @@
 import { prisma } from "../backend/utils/prisma";
 import { faker } from "@faker-js/faker";
 import { getRandomInt, shuffleArray } from "../util/general";
+import { getUserData } from "./utils";
 
 const MAX_CONNECTIONS_PER_USER = 50;
+
+const excludeArrayMatches = (targetArray: any[], toRemove: any[] = []) =>
+  targetArray.filter((item) => !toRemove.includes(item));
+const excludeItemFromArray = (toRemove: any, targetArray: any[]) =>
+  targetArray.filter((item) => item !== toRemove);
 
 export default async function seed(amount: number = 100) {
   await prisma.userConnections.deleteMany({});
@@ -11,7 +17,7 @@ export default async function seed(amount: number = 100) {
   for (let i = 0; i < amount; i++) {
     await prisma.user.create({
       data: {
-        fullName: faker.name.fullName(),
+        fullName: faker.name.firstName() + " " + faker.name.lastName(),
         color: faker.color.rgb(),
       },
     });
@@ -27,9 +33,18 @@ export default async function seed(amount: number = 100) {
     availableUserIds = availableUserIds.filter((item) => item !== id);
   };
   for (let i = 0; i < availableUserIds.length; i++) {
+    const connectorId = availableUserIds[i];
+    // Gets ids from alreadySetConnections
+    const alreadySetConnections = (
+      await getUserData(connectorId)
+    )?.connections.map(({ connection }) => connection.id);
+    // Removes those ids from availableUserIds;
+    const availableToConnect = excludeArrayMatches(
+      availableUserIds,
+      alreadySetConnections
+    );
     const maxConnections =
-      50 < availableUserIds.length ? 50 : availableUserIds.length;
-    const connectorUserId = availableUserIds[0];
+      50 < availableToConnect.length ? 50 : availableToConnect.length;
     const connectionsN = getRandomInt(0, maxConnections);
     // Selects the user connections.
     // Shuffles the UsersId array and slices the amount of connections.
@@ -38,30 +53,40 @@ export default async function seed(amount: number = 100) {
       connectionsN
     );
     for (let j = 0; j < selectedUserIds.length; j++) {
-      const connectionsUserId = selectedUserIds[j];
+      const connectionId = selectedUserIds[j];
       // Stops the same user from connecting to itself.
-      if (connectionsUserId === connectorUserId) continue;
+      // Or stops the same connection from being written twice.
+      if (
+        connectionId === connectorId ||
+        !!(await prisma.userConnections.findFirst({
+          where: {
+            connectorId,
+            connectionId,
+          },
+        }))
+      )
+        continue;
       // Creates connection to (link many to many).
       // Creates relation between users and connection.
       await prisma.userConnections.create({
         data: {
-          connectorId: connectorUserId,
-          connectionId: connectionsUserId,
+          connectorId,
+          connectionId,
         },
       });
-      // Updates connector & connectee connection counts
-      userConnectionsCount[connectionsUserId]++;
-      userConnectionsCount[connectorUserId]++;
+      // Updates connector & connection counts
+      userConnectionsCount[connectionId]++;
+      userConnectionsCount[connectorId]++;
       // Ensure that connector won't have more than 50 connections.
       // - Removes from available users.
-      if (userConnectionsCount[connectionsUserId] > MAX_CONNECTIONS_PER_USER) {
-        removeUserFromAvailable(connectionsUserId);
+      if (userConnectionsCount[connectionId] > MAX_CONNECTIONS_PER_USER) {
+        excludeItemFromArray(connectionId, availableUserIds);
       }
       // Ensure that connector won't have more than 50 connections.
       // - Removes from available users.
       // - Breaks loop.
-      if (userConnectionsCount[connectorUserId] > MAX_CONNECTIONS_PER_USER) {
-        removeUserFromAvailable(connectorUserId);
+      if (userConnectionsCount[connectorId] > MAX_CONNECTIONS_PER_USER) {
+        excludeItemFromArray(connectorId, availableUserIds);
         break;
       }
     }
