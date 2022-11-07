@@ -5,15 +5,18 @@ You need docker installed in your machine.
 1. Create environment variables.
 
 - Database - Create file `.db` in the folder `./.env`, with the following content:
-  ```
-  POSTGRES_DB=database
-  POSTGRES_USER=user
-  POSTGRES_PASSWORD=simplepass
-  ```
+
+```
+POSTGRES_DB=database
+POSTGRES_USER=user
+POSTGRES_PASSWORD=simplepass
+```
+
 - NextJs - Create file `.env` in the folder `./services/nextjs`, with the following content:
-  ```
-  DATABASE_URL="postgresql://user:simplepass@db:5432/database?connect_timeout=300"
-  ```
+
+```
+DATABASE_URL="postgresql://user:simplepass@db:5432/database?connect_timeout=300"
+```
 
 2. Open terminal and navigate - using `cd` - to the project folder
 3. Run `docker compose build` to build the docker containers.
@@ -22,6 +25,8 @@ You need docker installed in your machine.
 6. To stop the container press the hotkey `control + c`, or close the terminal where the containers where initiated.
 7. In order access the _web_ server environment - "nextjs" container - run `docker exec -it nextjs /bin/bash`.
 8. While on the _web_ server environment you could run the seed command `npx prisma db seed`
+9. Run `exit` to exit the _web_ server environment
+10. Run `docker compose down -v --rmi=all` to destroy docker containers...
 
 ## Endpoints
 
