@@ -23,8 +23,6 @@ services:
     command: bash -c "yarn dev"
     volumes:
       - .:/app
-    env_file:
-      - .env/.nextjs
     depends_on:
       - db
 
